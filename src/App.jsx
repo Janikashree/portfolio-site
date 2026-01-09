@@ -303,16 +303,29 @@ const AdminPanel = ({ isOpen, onClose, data, onSave }) => {
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
             </button>
           ))}
-          <div className="mt-auto">
-             <button onClick={handleSave} className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 mb-2">
-               {saving ? <span className="animate-spin">⏳</span> : <Save size={18} />} Save Changes
-             </button>
-             <button onClick={onClose} className="w-full py-3 bg-red-500/10 text-red-500 hover:bg-red-500/20 rounded-xl font-bold">
-               Cancel
-             </button>
-          </div>
-        </div>
+         <div className="mt-auto space-y-2">
 
+  <button
+    onClick={async () => {
+      if (confirm("Reset database with current local data?")) {
+        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'content', 'portfolio');
+        await setDoc(docRef, formData);
+        alert("Database reset!");
+      }
+    }}
+    className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-bold"
+  >
+    Reset Database
+  </button>
+
+  <button onClick={handleSave} className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold flex items-center justify-center gap-2">
+    {saving ? "Saving..." : "Save Changes"}
+  </button>
+
+  <button onClick={onClose} className="w-full py-3 bg-red-500/10 text-red-500 hover:bg-red-500/20 rounded-xl font-bold">
+    Cancel
+  </button>
+</div>
         {/* Content Area */}
         <div className="flex-1 overflow-y-auto p-8">
           
