@@ -881,12 +881,9 @@ const App = () => {
     // CHANGED PATH: Added 'content' and 'portfolio' to ensure even number of segments (6)
     const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'content', 'portfolio');
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
-      if (docSnap.exists()) {
-        setData(docSnap.data());
-      }
-    }, (error) => {
-      console.error("Error fetching data:", error);
-    });
+  // disabled for reset
+});
+
 
     return () => unsubscribe();
   }, [user]);
