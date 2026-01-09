@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { supabase } from "./supabase";
 import { 
   Palette, 
   Layout, 
@@ -34,9 +35,7 @@ import {
 } from 'lucide-react';
 
 // Firebase Imports
-import { initializeApp } from "firebase/app";
-import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "firebase/auth";
-import { getFirestore, doc, setDoc, onSnapshot, collection } from "firebase/firestore";
+
 
 /* ========================================
    DEFAULT DATA (Fallback)
@@ -176,26 +175,6 @@ const ICON_MAP = {
   layers: <Layers className="w-6 h-6" />
 };
 
-/* ========================================
-   FIREBASE SETUP & HELPERS
-   ======================================== */
-const ADMIN_PIN = "2427"; // Change this PIN if needed
-
-// Initialize Firebase
-const firebaseConfig = typeof __firebase_config !== "undefined"
-  ? JSON.parse(__firebase_config)
-  : {
-      apiKey: "demo",
-      authDomain: "demo",
-      projectId: "demo",
-      storageBucket: "demo",
-      messagingSenderId: "demo",
-      appId: "demo"
-    };
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
 // AI Helper Function
 const callGemini = async (prompt, systemPrompt = "") => {
@@ -237,19 +216,19 @@ const AdminPanel = ({ isOpen, onClose, data, onSave }) => {
     if (data) setFormData(data);
   }, [data]);
 
-  const handleSave = async () => {
-    setSaving(true);
-    await onSave(formData);
-    setSaving(false);
-    onClose();
-  };
+const handleSaveData = async (newData) => {
+  const { error } = await supabase
+    .from("portfolio")
+    .update({ data: newData })
+    .eq("id", 1);
 
-  const updateProfile = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      profile: { ...prev.profile, [field]: value }
-    }));
-  };
+  if (error) {
+    alert("Save failed");
+    console.error(error);
+  } else {
+    alert("Saved successfully");
+  }
+};
 
   const updateStats = (index, value) => {
     const newStats = [...formData.stats];
@@ -304,22 +283,34 @@ const AdminPanel = ({ isOpen, onClose, data, onSave }) => {
             </button>
           ))}
          <div className="mt-auto space-y-2">
+<button
+  onClick={async () => {
+    const { error } = await supabase
+      .from("portfolio")
+      .update({ data: formData })
+      .eq("id", 1);
 
-  <button
-    onClick={async () => {
-      if (confirm("Reset database with current local data?")) {
-        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'content', 'portfolio');
-        await setDoc(docRef, formData);
-        alert("Database reset!");
-      }
-    }}
-    className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-bold"
-  >
-    Reset Database
-  </button>
+    if (error) {
+      alert("Save failed");
+      console.error(error);
+    } else {
+      alert("Saved successfully");
+      onClose();
+    }
+  }}
+  className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold"
+>
+Save Changes
+</button>
 
-  <button onClick={handleSave} className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold flex items-center justify-center gap-2">
-    {saving ? "Saving..." : "Save Changes"}
+<button
+  onClick={onClose}
+  className="w-full py-3 bg-red-500/10 text-red-500 hover:bg-red-500/20 rounded-xl font-bold"
+>
+Cancel
+</button>
+
+      {saving ? "Saving..." : "Save Changes"}
   </button>
 
   <button onClick={onClose} className="w-full py-3 bg-red-500/10 text-red-500 hover:bg-red-500/20 rounded-xl font-bold">
@@ -543,7 +534,7 @@ const AdminPanel = ({ isOpen, onClose, data, onSave }) => {
     </div>
   );
 };
-
+};
 // Custom Scroll Reveal Component
 const FadeIn = ({ children, delay = 0, className = "" }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -842,6 +833,21 @@ const ProjectDetailModal = ({ project, onClose }) => {
 };
 
 const App = () => {
+useEffect(() => {
+  const load = async () => {
+    const { data, error } = await supabase
+      .from("portfolio")
+      .select("data")
+      .single();
+
+    if (data?.data) {
+      setData(data.data);
+    }
+  };
+
+  load();
+}, []);
+
   const [data, setData] = useState(DEFAULT_DATA);
   const [activeCategory, setActiveCategory] = useState('all');
   const [currentRoleIndex, setCurrentRoleIndex] = useState(0);
@@ -854,40 +860,8 @@ const App = () => {
   const [showPinModal, setShowPinModal] = useState(false);
   const [pinInput, setPinInput] = useState("");
   const [showAdminPanel, setShowAdminPanel] = useState(false);
-  const [user, setUser] = useState(null);
 
-  // 1. Auth & Data Fetching
-  useEffect(() => {
-    // Auth
-    const initAuth = async () => {
-      if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-        await signInWithCustomToken(auth, __initial_auth_token);
-      } else {
-        await signInAnonymously(auth);
-      }
-    };
-    initAuth();
-    
-    const unsubscribe = onAuthStateChanged(auth, (u) => {
-       setUser(u);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  // 2. Real-time Data Sync
-  useEffect(() => {
-    if (!user) return;
-    
-    // CHANGED PATH: Added 'content' and 'portfolio' to ensure even number of segments (6)
-    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'content', 'portfolio');
-    const unsubscribe = onSnapshot(docRef, (docSnap) => {
-  // disabled for reset
-});
-
-
-    return () => unsubscribe();
-  }, [user]);
-
+ 
   // Admin Trigger Logic
   const handleLogoClick = () => {
     setAdminClickCount(prev => prev + 1);
@@ -913,20 +887,7 @@ const App = () => {
     }
   };
 
-  const handleSaveData = async (newData) => {
-    if (!user) return;
-    try {
-      // CHANGED PATH: Matches the fetch path above
-      const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'content', 'portfolio');
-      await setDoc(docRef, newData);
-      // Local update happens automatically via snapshot listener
-    } catch (e) {
-      console.error("Error saving:", e);
-      alert("Failed to save changes.");
-    }
-  };
-
-  // Filter Logic
+   // Filter Logic
   const categories = ['all', 'uiux', 'video', 'graphic', 'animation'];
   const filteredProjects = activeCategory === 'all' 
     ? data.portfolio 
@@ -1251,7 +1212,7 @@ const App = () => {
                 <input 
                   type="password"
                   autoFocus
-                  placeholder="Enter PIN (Default: 2026)"
+                  placeholder="Enter PIN (Default: 2427)"
                   value={pinInput}
                   onChange={(e) => setPinInput(e.target.value)}
                   className="w-full p-4 text-center text-2xl tracking-[0.5em] font-bold bg-gray-100 dark:bg-slate-800 rounded-xl mb-6 focus:ring-2 focus:ring-purple-600 outline-none"
