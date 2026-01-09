@@ -89,7 +89,7 @@ const DEFAULT_DATA = {
       id: 1,
       title: "Mobile App Prototype",
       category: "uiux",
-      image: "https://images.unsplash.com/photo-1616469829941-c7200edec809?auto=format&fit=crop&q=80&w=800",
+      image: "https://images.uhttps://images.unsplash.com/photo-1574717436423-a75aa315c106?auto=format&fit=crop&q=80&w=800nsplash.com/photo-1616469829941-c7200edec809?auto=format&fit=crop&q=80&w=800",
       desc: "A clean, user-friendly mobile application design focusing on intuitive navigation.",
       process: [
         { title: "User Research", desc: "Analyzed target audience needs and pain points through surveys." },
@@ -126,7 +126,7 @@ const ICON_MAP = {
 
 // AI Helper Function
 const callGemini = async (prompt, systemPrompt = "") => {
-  const apiKey = ""; // Insert Key Here if needed
+  const apiKey = "AIzaSyA1GzU_Nb1IYIzqkpXsrXFznuJpPOBAlv8"; // Insert Key Here if needed
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
   
   const payload = {
@@ -154,7 +154,7 @@ const callGemini = async (prompt, systemPrompt = "") => {
    COMPONENTS
    ======================================== */
 
-// Admin Panel
+// Admin Panel Component
 const AdminPanel = ({ isOpen, onClose, data, onSave }) => {
   const [formData, setFormData] = useState(data);
   const [activeTab, setActiveTab] = useState('profile');
@@ -197,6 +197,27 @@ const AdminPanel = ({ isOpen, onClose, data, onSave }) => {
       portfolio: prev.portfolio.filter(p => p.id !== id)
     }));
   };
+
+  // --- Process Helper Functions ---
+  const addProcessStep = (projectIndex) => {
+    const newPortfolio = [...formData.portfolio];
+    if (!newPortfolio[projectIndex].process) newPortfolio[projectIndex].process = [];
+    newPortfolio[projectIndex].process.push({ title: "New Step", desc: "Description..." });
+    setFormData({ ...formData, portfolio: newPortfolio });
+  };
+
+  const removeProcessStep = (projectIndex, stepIndex) => {
+    const newPortfolio = [...formData.portfolio];
+    newPortfolio[projectIndex].process = newPortfolio[projectIndex].process.filter((_, i) => i !== stepIndex);
+    setFormData({ ...formData, portfolio: newPortfolio });
+  };
+
+  const updateProcessStep = (projectIndex, stepIndex, field, value) => {
+    const newPortfolio = [...formData.portfolio];
+    newPortfolio[projectIndex].process[stepIndex][field] = value;
+    setFormData({ ...formData, portfolio: newPortfolio });
+  };
+  // -------------------------------------
 
   const handleSave = async () => {
     const { error } = await supabase
@@ -265,14 +286,16 @@ const AdminPanel = ({ isOpen, onClose, data, onSave }) => {
                  <h3 className="text-2xl font-bold">Manage Projects</h3>
                  <button onClick={addProject} className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"><Plus size={16} /> Add New</button>
                </div>
-               <div className="space-y-4">
+               <div className="space-y-8">
                  {formData.portfolio.map((project, idx) => (
-                   <div key={project.id} className="p-4 bg-gray-50 dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-gray-700">
-                     <div className="flex justify-between items-start mb-4">
-                       <h4 className="font-bold">Project #{idx + 1}</h4>
-                       <button onClick={() => deleteProject(project.id)} className="text-red-500 hover:bg-red-500/10 p-2 rounded-lg"><Trash2 size={16} /></button>
+                   <div key={project.id} className="p-6 bg-gray-50 dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                     
+                     <div className="flex justify-between items-start mb-4 border-b border-gray-200 dark:border-gray-700 pb-4">
+                       <h4 className="font-bold text-lg text-purple-600">Project #{idx + 1}</h4>
+                       <button onClick={() => deleteProject(project.id)} className="text-red-500 hover:bg-red-500/10 p-2 rounded-lg flex items-center gap-2 text-sm font-bold"><Trash2 size={16} /> Delete Project</button>
                      </div>
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                        <input value={project.title} onChange={(e) => { const newP = [...formData.portfolio]; newP[idx].title = e.target.value; setFormData({...formData, portfolio: newP}); }} className="p-2 bg-white dark:bg-slate-900 rounded border border-gray-200 dark:border-gray-700" placeholder="Title"/>
                        <select value={project.category} onChange={(e) => { const newP = [...formData.portfolio]; newP[idx].category = e.target.value; setFormData({...formData, portfolio: newP}); }} className="p-2 bg-white dark:bg-slate-900 rounded border border-gray-200 dark:border-gray-700">
                          <option value="uiux">UI/UX</option><option value="video">Video</option><option value="graphic">Graphic</option><option value="animation">Animation</option>
@@ -280,6 +303,38 @@ const AdminPanel = ({ isOpen, onClose, data, onSave }) => {
                        <input value={project.image} onChange={(e) => { const newP = [...formData.portfolio]; newP[idx].image = e.target.value; setFormData({...formData, portfolio: newP}); }} className="col-span-2 p-2 bg-white dark:bg-slate-900 rounded border border-gray-200 dark:border-gray-700" placeholder="Image URL"/>
                        <textarea value={project.desc} onChange={(e) => { const newP = [...formData.portfolio]; newP[idx].desc = e.target.value; setFormData({...formData, portfolio: newP}); }} className="col-span-2 p-2 bg-white dark:bg-slate-900 rounded border border-gray-200 dark:border-gray-700" placeholder="Description"/>
                      </div>
+
+                     <div className="bg-white dark:bg-slate-900 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+                        {/* Removed the "Work Process" label here as requested */}
+                        <div className="flex justify-end mb-2">
+                           <button onClick={() => addProcessStep(idx)} className="text-xs bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 font-bold">+ Add Step</button>
+                        </div>
+                        
+                        <div className="space-y-3">
+                           {project.process && project.process.map((step, stepIdx) => (
+                              <div key={stepIdx} className="flex gap-2 items-start">
+                                 <span className="mt-2 text-xs font-bold text-gray-400">{stepIdx + 1}.</span>
+                                 <div className="flex-1 space-y-2">
+                                    <input 
+                                       value={step.title} 
+                                       onChange={(e) => updateProcessStep(idx, stepIdx, 'title', e.target.value)}
+                                       className="w-full p-2 text-sm bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 rounded" 
+                                       placeholder="Step Title"
+                                    />
+                                    <textarea 
+                                       value={step.desc}
+                                       onChange={(e) => updateProcessStep(idx, stepIdx, 'desc', e.target.value)}
+                                       className="w-full p-2 text-sm bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-800 rounded" 
+                                       placeholder="Step Description"
+                                       rows={2}
+                                    />
+                                 </div>
+                                 <button onClick={() => removeProcessStep(idx, stepIdx)} className="mt-2 text-red-400 hover:text-red-600"><X size={16} /></button>
+                              </div>
+                           ))}
+                        </div>
+                     </div>
+
                    </div>
                  ))}
                </div>
@@ -322,7 +377,6 @@ const AdminPanel = ({ isOpen, onClose, data, onSave }) => {
     </div>
   );
 };
-
 // FadeIn Component
 const FadeIn = ({ children, delay = 0, className = "" }) => {
   const [isVisible, setIsVisible] = useState(false);
