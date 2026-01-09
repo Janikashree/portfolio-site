@@ -384,6 +384,58 @@ const AdminPanel = ({ isOpen, onClose, data, onSave }) => {
                        <button onClick={() => deleteProject(project.id)} className="text-red-500 hover:bg-red-500/10 p-2 rounded-lg"><Trash2 size={16} /></button>
                      </div>
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <div className="col-span-2 mt-4">
+  <label className="block font-semibold mb-2">Work Process</label>
+
+  {project.process.map((step, pidx) => (
+    <div key={pidx} className="flex gap-2 mb-2">
+      <input
+        placeholder="Step title"
+        value={step.title}
+        onChange={(e) => {
+          const newP = [...formData.portfolio];
+          newP[idx].process[pidx].title = e.target.value;
+          setFormData({ ...formData, portfolio: newP });
+        }}
+        className="flex-1 p-2 rounded border"
+      />
+
+      <input
+        placeholder="Description"
+        value={step.desc}
+        onChange={(e) => {
+          const newP = [...formData.portfolio];
+          newP[idx].process[pidx].desc = e.target.value;
+          setFormData({ ...formData, portfolio: newP });
+        }}
+        className="flex-1 p-2 rounded border"
+      />
+
+      <button
+        onClick={() => {
+          const newP = [...formData.portfolio];
+          newP[idx].process.splice(pidx, 1);
+          setFormData({ ...formData, portfolio: newP });
+        }}
+        className="text-red-500 px-2"
+      >
+        ✕
+      </button>
+    </div>
+  ))}
+
+  <button
+    onClick={() => {
+      const newP = [...formData.portfolio];
+      newP[idx].process.push({ title: "New Step", desc: "" });
+      setFormData({ ...formData, portfolio: newP });
+    }}
+    className="mt-2 px-3 py-1 bg-purple-600 text-white rounded"
+  >
+    + Add Step
+  </button>
+</div>
+
                        <input 
                          placeholder="Title"
                          value={project.title}
@@ -798,9 +850,7 @@ const ProjectDetailModal = ({ project, onClose }) => {
             {project.desc}
           </p>
 
-          <h3 className="text-2xl font-bold mb-8 flex items-center gap-3">
-            <Layers className="text-purple-600" /> Work Process
-          </h3>
+          
 
           <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent">
             {project.process && project.process.map((step, idx) => (
@@ -810,9 +860,9 @@ const ProjectDetailModal = ({ project, onClose }) => {
                 </div>
                 
                 <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-6 rounded-2xl bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow">
-                  <h4 className="font-bold text-lg mb-2 text-gray-900 dark:text-white flex items-center gap-2">
+                  <h3 className="font-bold text-lg mb-2 text-gray-900 dark:text-white flex items-center gap-2">
                     {step.title}
-                  </h4>
+                  </h3>
                   <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
                     {step.desc}
                   </p>
