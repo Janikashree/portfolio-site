@@ -33,9 +33,7 @@ import {
   Trash2,
   Edit2
 } from 'lucide-react';
-
-// Firebase Imports
-
+const ADMIN_PIN = "2427";
 
 /* ========================================
    DEFAULT DATA (Fallback)
@@ -534,7 +532,6 @@ Cancel
     </div>
   );
 };
-};
 // Custom Scroll Reveal Component
 const FadeIn = ({ children, delay = 0, className = "" }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -833,22 +830,22 @@ const ProjectDetailModal = ({ project, onClose }) => {
 };
 
 const App = () => {
-useEffect(() => {
-  const load = async () => {
-    const { data, error } = await supabase
-      .from("portfolio")
-      .select("data")
-      .single();
-
-    if (data?.data) {
-      setData(data.data);
-    }
-  };
-
-  load();
-}, []);
-
   const [data, setData] = useState(DEFAULT_DATA);
+
+  useEffect(() => {
+    const load = async () => {
+      const { data, error } = await supabase
+        .from("portfolio")
+        .select("data")
+        .single();
+
+      if (data?.data) {
+        setData(data.data);
+      }
+    };
+
+    load();
+  }, []);
   const [activeCategory, setActiveCategory] = useState('all');
   const [currentRoleIndex, setCurrentRoleIndex] = useState(0);
   const [darkMode, setDarkMode] = useState(true); 
