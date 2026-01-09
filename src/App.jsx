@@ -231,21 +231,21 @@ const AdminPanel = ({ isOpen, onClose, data, onSave }) => {
     setFormData(prev => ({ ...prev, stats: newStats }));
   };
 
-  // Helper to add a project
-  const addProject = () => {
-    const newProject = {
-      id: Date.now(),
-      title: "New Project",
-      category: "uiux",
-      image: "https://images.unsplash.com/photo-1616469829941-c7200edec809?auto=format&fit=crop&q=80&w=800",
-      desc: "Project description goes here.",
-      process: []
-    };
-    setFormData(prev => ({
-      ...prev,
-      portfolio: [newProject, ...prev.portfolio]
-    }));
+// Helper to add a project
+const addProject = () => {
+  const newProject = {
+    id: Date.now(),
+    title: "New Project",
+    category: "uiux",
+    image: "",
+    desc: "",
+    process: []   // ← REQUIRED
   };
+  setFormData(prev => ({
+    ...prev,
+    portfolio: [newProject, ...prev.portfolio]
+  }));
+};
 
   // Helper to delete a project
   const deleteProject = (id) => {
@@ -387,7 +387,7 @@ const AdminPanel = ({ isOpen, onClose, data, onSave }) => {
                      <div className="col-span-2 mt-4">
   <label className="block font-semibold mb-2">Work Process</label>
 
-  {project.process.map((step, pidx) => (
+  {(project.process || []).map((step, pidx) => (
     <div key={pidx} className="flex gap-2 mb-2">
       <input
         placeholder="Step title"
@@ -853,7 +853,7 @@ const ProjectDetailModal = ({ project, onClose }) => {
           
 
           <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 before:to-transparent">
-            {project.process && project.process.map((step, idx) => (
+           {Array.isArray(project.process) && project.process.map((step, idx) => (
               <div key={idx} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
                 <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-slate-100 dark:bg-slate-900 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 text-purple-600 font-bold">
                   {idx + 1}
