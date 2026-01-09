@@ -452,37 +452,79 @@ const AdminPanel = ({ isOpen, onClose, data, onSave }) => {
           )}
 
            {activeTab === 'skills' && (
-            <div className="space-y-6">
-              <h3 className="text-2xl font-bold mb-4">Edit Software Skills</h3>
-               <p className="text-sm text-gray-500 mb-4">Note: Currently showing simplified view. Edit raw JSON in code for full control over categories.</p>
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                 {formData.software.map((tool, idx) => (
-                   <div key={idx} className="flex gap-2 items-center p-3 bg-gray-50 dark:bg-slate-800 rounded-lg">
-                      <input 
-                        value={tool.name}
-                        onChange={(e) => {
-                           const newS = [...formData.software];
-                           newS[idx].name = e.target.value;
-                           setFormData({...formData, software: newS});
-                        }}
-                        className="flex-1 p-2 bg-white dark:bg-slate-900 rounded border border-gray-200 dark:border-gray-700"
-                      />
-                       <input 
-                        type="number"
-                        value={tool.level}
-                        onChange={(e) => {
-                           const newS = [...formData.software];
-                           newS[idx].level = parseInt(e.target.value);
-                           setFormData({...formData, software: newS});
-                        }}
-                        className="w-20 p-2 bg-white dark:bg-slate-900 rounded border border-gray-200 dark:border-gray-700"
-                      />
-                   </div>
-                 ))}
-               </div>
-            </div>
-          )}
+  <div className="space-y-6">
+    <div className="flex justify-between items-center">
+      <h3 className="text-2xl font-bold">Edit Software Skills</h3>
+      <button
+        onClick={() => {
+          const newTool = { name: "New Software", category: "Design", level: 50 };
+          setFormData(prev => ({
+            ...prev,
+            software: [...prev.software, newTool]
+          }));
+        }}
+        className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+      >
+        <Plus size={16} /> Add Software
+      </button>
+    </div>
 
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {formData.software.map((tool, idx) => (
+        <div key={idx} className="flex gap-2 items-center p-3 bg-gray-50 dark:bg-slate-800 rounded-lg">
+          
+          <input
+            value={tool.name}
+            onChange={(e) => {
+              const newS = [...formData.software];
+              newS[idx].name = e.target.value;
+              setFormData({ ...formData, software: newS });
+            }}
+            className="flex-1 p-2 bg-white dark:bg-slate-900 rounded border border-gray-200 dark:border-gray-700"
+          />
+
+          <select
+            value={tool.category}
+            onChange={(e) => {
+              const newS = [...formData.software];
+              newS[idx].category = e.target.value;
+              setFormData({ ...formData, software: newS });
+            }}
+            className="p-2 bg-white dark:bg-slate-900 rounded border border-gray-200 dark:border-gray-700"
+          >
+            <option value="Design">Design</option>
+            <option value="Video">Video</option>
+            <option value="Dev">Dev</option>
+          </select>
+
+          <input
+            type="number"
+            min="0"
+            max="100"
+            value={tool.level}
+            onChange={(e) => {
+              const newS = [...formData.software];
+              newS[idx].level = parseInt(e.target.value);
+              setFormData({ ...formData, software: newS });
+            }}
+            className="w-20 p-2 bg-white dark:bg-slate-900 rounded border border-gray-200 dark:border-gray-700"
+          />
+
+          <button
+            onClick={() => {
+              const newS = formData.software.filter((_, i) => i !== idx);
+              setFormData({ ...formData, software: newS });
+            }}
+            className="text-red-500 hover:bg-red-500/10 p-2 rounded-lg"
+          >
+            <Trash2 size={16} />
+          </button>
+
+        </div>
+      ))}
+    </div>
+  </div>
+)}
         </div>
       </div>
     </div>
