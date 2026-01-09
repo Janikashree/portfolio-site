@@ -1287,7 +1287,7 @@ const App = () => {
           isOpen={showAdminPanel} 
           onClose={() => setShowAdminPanel(false)}
           data={data}
-          onSave={handleSaveData}
+          onSave={(newData) => setData(newData)}
         />
         
       </div>
